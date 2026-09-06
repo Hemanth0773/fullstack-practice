@@ -4,6 +4,9 @@ import pool from "../config/db.js";
 const createTodo = async (req, res) => {
   try {
     const { description, completed } = req.body;
+    if (!description) {
+      return res.status(400).json({ error: "Description is required" });
+    }
     const newTodo = await pool.query(
       "INSERT INTO todo (description, completed) VALUES ($1, $2) RETURNING * ",
       [description, completed || false],
@@ -37,9 +40,12 @@ const updateTodo = async (req, res) => {
   try {
     const { id } = req.params;
     const { description, completed } = req.body;
+    if (!description) {
+      return res.status(400).json({ error: "Description is required" });
+    }
     const updatedTodo = await pool.query(
       "update todo set description = $1, completed = $2 where todo_id = $3 returning *",
-      [description, completed, id],
+      [description, completed || false, id],
     );
     if (updatedTodo.rows.length === 0) {
       return res.status(404).json({

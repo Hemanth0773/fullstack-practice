@@ -6,33 +6,41 @@ import "../index.css";
 import axios from "axios";
 
 export function TodoPage() {
-  const [description, setDesc] = useState("");
+  const [description, setDescription] = useState("");
   const [todos, setTodos] = useState([]);
   const [editingTodo, setEditingTodo] = useState(null);
   const [editedText, setEditedText] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const onSubmitForm = async (e) => {
     e.preventDefault();
-
+    if (!description.trim()) return;
     try {
-      await axios.post("http://localhost:5000/api/todos", {
-        description,
+      setError(null);
+      const res = await axios.post(`http://localhost:5000/api/todos`, {
+        description: description.trim(),
         completed: false,
       });
-
-      setDesc("");
-      getTodos();
-    } catch (error) {
-      console.error(error.message);
+      setTodos([...todos, res.data]);
+      setDescription("");
+    } catch (err) {
+      console.error(err.message);
+      setError("Failed to add todo. Please try again.");
     }
   };
 
   const getTodos = async () => {
     try {
+      setLoading(true);
+      setError(null);
       const response = await axios.get("http://localhost:5000/api/todos");
       setTodos(response.data);
     } catch (error) {
       console.error(error.message);
+      setError("Failed to fetch todos. Please try again later.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -40,11 +48,77 @@ export function TodoPage() {
     getTodos();
   }, []);
 
+  const saveEdit = async (id) => {
+    try {
+      setError(null);
+
+      const currentTodo = todos.find((todo) => todo.todo_id === id);
+      const trimmedText = editedText.trim();
+
+      if (currentTodo.description === trimmedText) {
+        setEditingTodo(null);
+        setEditedText("");
+        return;
+      }
+      await axios.put(`http://localhost:5000/api/todos/${id}`, {
+        description: trimmedText,
+      });
+      setEditingTodo(null);
+      setEditedText("");
+      setTodos(
+        todos.map((todo) =>
+          todo.todo_id === id
+            ? { ...todo, description: trimmedText, completed: false }
+            : todo,
+        ),
+      );
+    } catch (err) {
+      console.error(err.message);
+      setError("Failed to update todo. Please try again.");
+    }
+  };
+
+  const deleteTodo = async (id) => {
+    try {
+      setError(null);
+      await axios.delete(`http://localhost:5000/api/todos/${id}`);
+      setTodos(todos.filter((todo) => todo.todo_id !== id));
+    } catch (err) {
+      console.error(err.message);
+      setError("Failed to delete todo. Please try again.");
+    }
+  };
+
+  const toggleCompleted = async (id) => {
+    try {
+      setError(null);
+      const todo = todos.find((todo) => todo.todo_id === id);
+      await axios.put(`http://localhost:5000/api/todos/${id}`, {
+        description: todo.description,
+        completed: !todo.completed,
+      });
+      setTodos(
+        todos.map((todo) =>
+          todo.todo_id === id ? { ...todo, completed: !todo.completed } : todo,
+        ),
+      );
+    } catch (err) {
+      console.error(err.message);
+      setError("Failed to update todo. Please try again.");
+    }
+  };
+
   return (
     <>
       <div className="min-h-screen bg-gray-800 flex justify-center items-center p-4">
         <div className="bg-gray-50 rounded-2xl shadow-xl w-full max-w-lg p-8">
           <h1 className="text-4xl font-bold text-gray-800 mb-8">TODO APP</h1>
+
+          {error && (
+            <div className="bg-red-100 text-red-700 p-3 rounded mb-4">
+              {error}
+            </div>
+          )}
 
           <form
             onSubmit={onSubmitForm}
@@ -55,7 +129,7 @@ export function TodoPage() {
               type="text"
               value={description}
               onChange={(e) => {
-                setDesc(e.target.value);
+                setDescription(e.target.value);
               }}
               placeholder="What needs to be done?"
               required
@@ -67,7 +141,11 @@ export function TodoPage() {
           </form>
 
           <div>
-            {todos.length === 0 ? (
+            {loading ? (
+              <div>
+                <p className="text-gray-600">Loading tasks...</p>
+              </div>
+            ) : todos.length === 0 ? (
               <p className="text-gray-600">
                 No tasks available. Add a new task!
               </p>
@@ -85,7 +163,10 @@ export function TodoPage() {
                             onChange={(e) => setEditedText(e.target.value)}
                           />
                           <div>
-                            <button className="px-4 py-2 bg-green-500 text-white rounded-lg mr-2 mt-2 hover:bg-green-600 duration-200">
+                            <button
+                              onClick={() => saveEdit(todo.todo_id)}
+                              className="px-4 py-2 bg-green-500 text-white rounded-lg mr-2 mt-2 hover:bg-green-600 duration-200"
+                            >
                               <MdOutlineDone />
                             </button>
                             <button
@@ -98,9 +179,10 @@ export function TodoPage() {
                         </div>
                       ) : (
                         <div className="flex justify-between items-center">
-                          <div className="flex items-center gap-x-4">
+                          <div className="flex items-center gap-x-4 overflow-hidden">
                             <button
-                              className={`h-6 w-6 border-2 rounded-full flex items-center justify-center ${
+                              onClick={() => toggleCompleted(todo.todo_id)}
+                              className={`shrink-0 h-6 w-6 border-2 rounded-full flex items-center justify-center ${
                                 todo.completed
                                   ? "bg-green-500 border-green-500 text-white"
                                   : "border-gray-300 hover:border-blue-400"
@@ -122,7 +204,12 @@ export function TodoPage() {
                               <MdModeEditOutline />
                             </button>
 
-                            <button className="p-2 text-red-500 hover:text-red-700 rounded-lg hover:bg-red-100 duration-200">
+                            <button
+                              onClick={() => {
+                                deleteTodo(todo.todo_id);
+                              }}
+                              className="p-2 text-red-500 hover:text-red-700 rounded-lg hover:bg-red-100 duration-200"
+                            >
                               <FaTrash />
                             </button>
                           </div>
