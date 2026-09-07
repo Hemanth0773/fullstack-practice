@@ -55,8 +55,6 @@ chatbot-project/
 
 ---
 
-
-
 ## Components
 
 ### `ChatInput`
@@ -83,14 +81,12 @@ Displays the complete conversation and automatically scrolls to the newest messa
 
 ---
 
-
-
 ## Getting Started
 
 ### 1. Clone the repository
 
 ```bash
-git clone YOUR_REPOSITORY_URL
+git clone https://github.com/Hemanth0773/fullstack-practice.git
 ```
 
 ### 2. Navigate into the project
