@@ -1,16 +1,82 @@
-# React + Vite
+# PERN Todo App
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A full-stack Todo application built with the **PERN stack**.
 
-Currently, two official plugins are available:
+Users can create, view, update, complete, and delete todos through a React frontend connected to an Express API and PostgreSQL database.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Tech Stack
 
-## React Compiler
+- **Frontend:** React, Vite, Tailwind CSS, Axios
+- **Backend:** Node.js, Express.js
+- **Database:** PostgreSQL
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Features
 
-## Expanding the ESLint configuration
+- Create todos
+- View all todos
+- Update todos
+- Mark todos as completed
+- Delete todos
+- Responsive UI
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Project Structure
+
+```text
+todo/
+├── backend/
+│   └── src/
+│       ├── config/
+│       ├── controller/
+│       ├── routes/
+│       └── app.js
+│
+└── frontend/
+    └── src/
+        ├── pages/
+        ├── App.jsx
+        └── main.jsx
+```
+
+## API Endpoints
+
+| Method | Endpoint         | Description   |
+| ------ | ---------------- | ------------- |
+| POST   | `/api/todos`     | Create a todo |
+| GET    | `/api/todos`     | Get all todos |
+| PUT    | `/api/todos/:id` | Update a todo |
+| DELETE | `/api/todos/:id` | Delete a todo |
+
+## Getting Started
+
+### Backend
+
+```bash
+cd backend
+npm install
+npm run dev
+```
+
+### Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Make sure PostgreSQL is running and the database connection is configured in the backend.
+
+## What I Practiced
+
+- React state and `useEffect`
+- REST APIs
+- Axios
+- Express routing and controllers
+- PostgreSQL
+- CRUD operations
+- Async/await
+- Tailwind CSS
+
+## Author
+
+Hemanth A M
