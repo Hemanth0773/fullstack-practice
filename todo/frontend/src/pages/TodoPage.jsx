@@ -13,6 +13,7 @@ export function TodoPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // Create
   const onSubmitForm = async (e) => {
     e.preventDefault();
     if (!description.trim()) return;
@@ -30,24 +31,41 @@ export function TodoPage() {
     }
   };
 
-  const getTodos = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const response = await axios.get("http://localhost:5000/api/todos");
-      setTodos(response.data);
-    } catch (error) {
-      console.error(error.message);
-      setError("Failed to fetch todos. Please try again later.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  //Fetch
   useEffect(() => {
+    let ignore = false;
+
+    const getTodos = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const response = await axios.get("http://localhost:5000/api/todos");
+
+        if (!ignore) {
+          setTodos(response.data);
+        }
+      } catch (error) {
+        console.error(error.message);
+
+        if (!ignore) {
+          setError("Failed to fetch todos. Please try again later.");
+        }
+      } finally {
+        if (!ignore) {
+          setLoading(false);
+        }
+      }
+    };
+
     getTodos();
+
+    return () => {
+      ignore = true;
+    };
   }, []);
 
+  //update
   const saveEdit = async (id) => {
     try {
       setError(null);
@@ -78,6 +96,7 @@ export function TodoPage() {
     }
   };
 
+  // delete
   const deleteTodo = async (id) => {
     try {
       setError(null);
@@ -89,6 +108,7 @@ export function TodoPage() {
     }
   };
 
+  //toggle completed
   const toggleCompleted = async (id) => {
     try {
       setError(null);
